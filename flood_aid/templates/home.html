@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block title %}Chiến Dịch Cứu Trợ - Cứu Trợ Lũ Lụt{% endblock %}
+
+{% block content %}
+<h2 class="mb-4">Chiến Dịch Cứu Trợ</h2>
+
+{% if featured_campaigns %}
+<div class="mb-5">
+    <div class="row">
+        {% for campaign in featured_campaigns %}
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 shadow-sm border-0">
+                    <div class="position-relative">
+                        {% if campaign.thumbnail %}
+                            <img src="{{ campaign.thumbnail.url }}" class="card-img-top" alt="{{ campaign.title }}">
+                        {% else %}
+                            <div class="bg-light text-center py-5">Không có hình ảnh</div>
+                        {% endif %}
+                        <div class="position-absolute top-0 start-0 bg-primary text-white px-2 py-1 m-2 rounded-pill">Nổi bật</div>
+                    </div>
+                    <div class="card-body">
+                        <h5 class="card-title">{{ campaign.title }}</h5>
+                        <h6 class="card-subtitle mb-2 text-muted">{{ campaign.charity_org.name }}</h6>
+                        <p class="card-text">{{ campaign.description|truncatewords:20 }}</p>
+                        <div class="progress mb-3" style="height: 10px;">
+                            <div class="progress-bar bg-success" role="progressbar" style="width: {{ campaign.progress_percentage }}%;" aria-valuenow="{{ campaign.progress_percentage }}" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                        <p class="text-muted">Đã quyên góp: {{ campaign.current_amount|floatformat:2 }} of {{ campaign.target_amount|floatformat:2 }}</p>
+                        <a href="{% url 'campaign_detail' campaign.id %}" class="btn btn-primary btn-sm">Xem Chi Tiết</a>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+{% endblock %}

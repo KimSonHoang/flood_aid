@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block title %}Xóa Chiến Dịch - Cứu Trợ Lũ Lụt{% endblock %}
+
+{% block content %}
+<h2 class="mb-4">Xóa Chiến Dịch</h2>
+
+<p>Bạn có chắc chắn muốn xóa chiến dịch "{{ campaign.title }}" không?</p>
+
+<form method="post">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-danger">Xác Nhận Xóa</button>
+    <a href="{% url 'manage_campaigns' %}" class="btn btn-secondary">Huỷ</a>
+</form>
+{% endblock %}

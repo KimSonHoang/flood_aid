@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block title %}Quản lý Chiến dịch - Cứu trợ Lũ lụt{% endblock %}
+
+{% block content %}
+<h2 class="mb-4">Quản lý Chiến dịch</h2>
+<a href="{% url 'create_campaign' %}" class="btn btn-primary mb-3">Tạo Chiến dịch Mới</a>
+
+<div class="row">
+    {% for campaign in campaigns %}
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 shadow-sm border-0">
+                {% if campaign.thumbnail %}
+                    <img src="{{ campaign.thumbnail.url }}" class="card-img-top" alt="{{ campaign.title }}">
+                {% else %}
+                    <div class="bg-light text-center py-5">Không có Hình ảnh</div>
+                {% endif %}
+                <div class="card-body">
+                    <h5 class="card-title">{{ campaign.title }}</h5>
+                    <p class="card-text">{{ campaign.description|truncatewords:20 }}</p>
+                    <p class="text-muted">Trạng thái: {{ campaign.status }}</p>
+                    <div class="d-flex justify-content-between">
+                        <a href="{% url 'edit_campaign' campaign.id %}" class="btn btn-outline-primary btn-sm">Chỉnh sửa</a>
+                        <a href="{% url 'delete_campaign' campaign.id %}" class="btn btn-outline-danger btn-sm">Xóa</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% empty %}
+        <div class="col-12">
+            <p>Bạn chưa tạo chiến dịch nào.</p>
+        </div>
+    {% endfor %}
+</div>
+{% endblock %}

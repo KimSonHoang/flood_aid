@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block title %}Chiến Dịch Cứu Trợ - Cứu Trợ Lũ Lụt{% endblock %}
+
+{% block content %}
+<h2 class="mb-4">Chiến Dịch Cứu Trợ</h2>
+
+<div class="row">
+    {% for campaign in campaigns %}
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 shadow-sm border-0">
+                {% if campaign.thumbnail %}
+                    <img src="{{ campaign.thumbnail.url }}" class="card-img-top" alt="{{ campaign.title }}">
+                {% else %}
+                <div class="bg-light text-center py-5">Không có hình ảnh</div>
+                {% endif %}
+                <div class="card-body">
+                    <h5 class="card-title">{{ campaign.title }}</h5>
+                    <h6 class="card-subtitle mb-2 text-muted">{{ campaign.charity_org.name }}</h6>
+                    <p class="card-text">{{ campaign.description|truncatewords:20 }}</p>
+                    <div class="progress mb-3" style="height: 10px;">
+                        <div class="progress-bar bg-success" role="progressbar" style="width: {{ campaign.progress_percentage }}%;" aria-valuenow="{{ campaign.progress_percentage }}" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                    <p class="text-muted">Đã quyên góp: {{ campaign.current_amount|floatformat:2 }} of {{ campaign.target_amount|floatformat:2 }}</p>
+                    <a href="{% url 'campaign_detail' campaign.id %}" class="btn btn-outline-primary btn-sm">Xem Chi Tiết</a>
+                </div>
+            </div>
+        </div>
+    {% empty %}
+        <div class="col-12">
+            <p>Không có chiến dịch nào.</p>
+        </div>
+    {% endfor %}
+</div>
+{% endblock %}

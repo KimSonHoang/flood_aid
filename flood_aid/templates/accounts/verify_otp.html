@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block title %}Xác minh mã OTP - Cứu trợ Lũ lụt{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card shadow">
+            <div class="card-body">
+                <h2 class="card-title text-center mb-4">Xác Minh Tài Khoản Của Bạn</h2>
+                <p class="text-center">Mã OTP đã được gửi đến số điện thoại của bạn: {{ phone_number }}</p>
+                <form method="post" novalidate>
+                    {% csrf_token %}
+                    {% for field in form %}
+                        <div class="mb-3">
+                            <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+                            {{ field }}
+                            {% if field.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ field.errors.as_text }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary btn-lg">Xác minh</button>
+                    </div>
+                </form>
+                <div class="text-center mt-3">
+                    <p>Chưa nhận được mã OTP? <a href="{% url 'verify_otp' %}">Gửi lại mã OTP</a></p>
+                    <p>Hoặc <a href="{% url 'login' %}">đăng nhập lại</a> để gửi lại mã OTP.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

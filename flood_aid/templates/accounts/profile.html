@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% block title %}Hồ Sơ - Flood Aid{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow">
+            <div class="card-body">
+                <h2 class="card-title text-center mb-4">Hồ Sơ Của Bạn</h2>
+                {% if user.user_type == 'charity' and charity_org %}
+                    <div class="mb-4">
+                        <h4>Thông Tin Tổ Chức Từ Thiện</h4>
+                        <p><strong>Tên:</strong> {{ charity_org.name }}</p>
+                        <p><strong>Trạng Thái Phê Duyệt:</strong> {% if charity_org.is_approve %}Đã Phê Duyệt{% else %}Đang Chờ{% endif %}</p>
+                    </div>
+                {% endif %}
+                <form method="post" novalidate>
+                    {% csrf_token %}
+                    {% for field in form %}
+                        <div class="mb-3">
+                            <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+                            {% if user.user_type == 'charity' and charity_org %}
+                                {{ field }}
+                            {% else %}
+                                <input type="text" 
+                                       class="form-control" 
+                                       value="{{ field.value|default:'' }}" 
+                                       readonly>
+                                {{ field.as_hidden }}
+                            {% endif %}
+                            {% if field.help_text %}
+                                <small class="form-text text-muted">{{ field.help_text }}</small>
+                            {% endif %}
+                            {% if field.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ field.errors.as_text }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                    {% if user.user_type == 'charity' and charity_org %}
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-lg">Cập Nhật Hồ Sơ</button>
+                        </div>
+                    {% endif %}
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

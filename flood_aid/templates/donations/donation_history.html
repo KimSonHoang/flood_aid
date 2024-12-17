@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+
+{% block title %}Lịch Sử Quyên Góp - Cứu Trợ Lũ Lụt{% endblock %}
+
+{% block content %}
+<h2 class="mb-4">Lịch Sử Quyên Góp</h2>
+
+<div class="mb-3">
+    <a href="{% url 'donation_history' %}?show_all=true" class="btn btn-primary {% if show_all %}active{% endif %}">Xem Tất Cả Quyên Góp</a>
+    {% if user.is_authenticated and user.user_type != 'recipient' %}
+        <a href="{% url 'donation_history' %}?show_all=false" class="btn btn-primary {% if not show_all %}active{% endif %}">Xem Quyên Góp Của Tôi</a>
+    {% endif %}
+</div>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Ngày</th>
+            <th>Người Quyên Góp</th>
+            <th>Chiến Dịch</th>
+            <th>Số Tiền</th>
+            <th>Phương Thức Thanh Toán</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for donation in donations %}
+        <tr>
+            <td>{{ donation.created_at|date:"Y-m-d H:i" }}</td>
+            <td>
+                {% if donation.donor == user %}
+                    <strong>You</strong>
+                {% else %}
+                    {{ donation.donor.email }}
+                {% endif %}
+            </td>
+            <td>{{ donation.campaign.title }}</td>
+            <td>{{ donation.amount }}</td>
+            <td>{{ donation.get_payment_method_display }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="5">Không tìm thấy quyên góp nào.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

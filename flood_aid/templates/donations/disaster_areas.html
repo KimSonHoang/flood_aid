@@ -1,0 +1,323 @@
+{% extends 'base.html' %}
+
+{% block title %}Tình Hình Lũ Lụt - Cứu Trợ Lũ Lụt{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-9">
+        <h2 class="mb-4">{{ campaign.title }}</h2>
+    </div>
+    {% if is_campaign_owner %}
+    <div class="col-md-3">
+        <a href="{% url 'edit_campaign' campaign.id %}" class="btn btn-outline-primary btn-sm">Chỉnh sửa</a>
+        <a href="{% url 'delete_campaign' campaign.id %}" class="btn btn-outline-danger btn-sm">Xóa</a>
+    </div>
+    {% endif %}
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h3>Chi Tiết Chiến Dịch</h3>
+        <p><strong>Tổ Chức Từ Thiện:</strong> {{ campaign.charity_org.name }}</p>
+        <p><strong>Mô Tả:</strong> {{ campaign.description }}</p>
+        <p><strong>Ngày Bắt Đầu:</strong> {{ campaign.start_date }}</p>
+        <p><strong>Ngày Kết Thúc:</strong> {{ campaign.end_date }}</p>
+        <p><strong>Số Tiền Mục Tiêu:</strong> {{ campaign.target_amount }}</p>
+        <p><strong>Số Tiền Hiện Tại:</strong> {{ campaign.current_amount }}</p>
+        <p><strong>Trạng Thái:</strong> {{ campaign.get_status_display }}</p>
+        <div class="progress mb-3">
+            <div class="progress-bar" role="progressbar" style="width: {{ campaign.progress_percentage }}%;" aria-valuenow="{{ campaign.progress_percentage }}" aria-valuemin="0" aria-valuemax="100">{{ campaign.progress_percentage }}%</div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        {% if user.is_authenticated and user.user_type != 'recipient' %}
+            <h3>Quyên Góp Ngay</h3>
+            {% if user.is_authenticated %}
+                <form method="post">
+                    {% csrf_token %}
+                    {{ donation_form.as_p }}
+                    <button type="submit" name="donation_submit" class="btn btn-primary">Quyên Góp</button>
+                </form>
+            {% else %}
+                <p><a href="{% url 'login' %}">Đăng nhập</a> để quyên góp.</p>
+            {% endif %}
+        {% endif %}
+    </div>
+</div>
+
+<h3 class="mt-4">Nhu Cầu Cứu Trợ</h3>
+<ul>
+    <li>Cung Cấp Nước Sạch</li>
+    <li>Thực Phẩm Khô</li>
+    <li>Chăn Màn và Quần Áo</li>
+    <li>Vật Tư Y Tế</li>
+    <li>Vật Liệu Làm Nơi Trú Ẩn Tạm Thời</li>
+</ul>
+
+<h3 class="mb-4">Khu Vực Bị Ảnh Hưởng</h3>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/Leaflet/Leaflet.heat@v0.2.0/dist/leaflet-heat.js"></script>
+
+<div class="row">
+    <div class="col-md-5">
+        <div class="table-responsive" style="height: 500px; overflow-y: auto;">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Tên</th>
+                        <th>Mức Độ</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for area in areas %}
+                        <tr class="area-row" data-lat="{{ area.latitude }}" data-lon="{{ area.longitude }}" data-name="{{ area.name }}" data-severity="{{ area.get_severity_display }}">
+                            <td>{{ area.name }}</td>
+                            <td><span class="">{{ area.get_severity_display }}</span></td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="2">Không có khu vực thiên tai.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="col-md-7">
+        <div class="map-controls mb-2">
+            <div class="btn-group" role="group">
+                <button id="heatmapBtn" class="btn btn-sm btn-secondary" onclick="toggleMapView('heatmap')">Heatmap View</button>
+                <button id="markerBtn" class="btn btn-sm btn-secondary active" onclick="toggleMapView('markers')">Marker View</button>
+            </div>
+        </div>
+        <div id="map" style="height: 500px; width: 100%;"></div>
+    </div>
+</div>
+
+<div class="row mt-5">
+    <div class="col-md-8">
+        <h3 class="mb-4">Bình luận</h3>
+        
+        {% if user.is_authenticated %}
+            <div class="card mb-4">
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        {{ comment_form.content }}
+                        <button type="submit" name="comment_submit" class="btn btn-primary mt-3">Đăng bình luận</button>
+                    </form>
+                </div>
+            </div>
+        {% else %}
+            <div class="alert alert-info">
+                Vui lòng <a href="{% url 'login' %}">đăng nhập</a> để bình luận.
+            </div>
+        {% endif %}
+
+        <div class="comments-section">
+            {% for comment in comments %}
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <h6 class="card-subtitle mb-2 text-muted">
+                                {{ comment.user.email }}
+                            </h6>
+                            <small class="text-muted">
+                                {{ comment.created_at|date:"d/m/Y H:i" }}
+                            </small>
+                        </div>
+                        <p class="card-text">{{ comment.content }}</p>
+                    </div>
+                </div>
+            {% empty %}
+                <p class="text-muted">Chưa có bình luận nào.</p>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<script>
+    var map = L.map('map').setView([0, 0], 2);
+    var markers = {};
+    var markerLayer = L.layerGroup();
+    var heatLayer;
+    var currentView = 'markers';
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(map);
+
+    var bounds = L.latLngBounds();
+
+    function getSeverityColor(severity) {
+        switch(severity.toLowerCase()) {
+            case 'low': return 'green';
+            case 'medium': return 'orange';
+            case 'high': return 'red';
+            case 'critical': return 'purple';
+            default: return 'blue';
+        }
+    }
+
+    function getSeverityIntensity(severity) {
+        switch(severity.toLowerCase()) {
+            case 'low': return 0.3;
+            case 'medium': return 0.5;
+            case 'high': return 0.7;
+            case 'critical': return 1.0;
+            default: return 0.3;
+        }
+    }
+
+    // Prepare heatmap data
+    var heatmapData = [
+        {% for area in areas %}
+            [
+                {{ area.latitude }},
+                {{ area.longitude }},
+                getSeverityIntensity('{{ area.get_severity_display }}')
+            ],
+        {% endfor %}
+    ];
+
+    heatLayer = L.heatLayer(heatmapData, {
+        radius: 25,
+        blur: 15,
+        maxZoom: 10,
+        gradient: {
+            0.2: 'blue',
+            0.4: 'lime',
+            0.6: 'yellow',
+            0.8: 'orange',
+            1.0: 'red'
+        }
+    });
+
+    {% for area in areas %}
+        var lat = {{ area.latitude }};
+        var lng = {{ area.longitude }};
+        bounds.extend([lat, lng]);
+        var severityColor = getSeverityColor('{{ area.get_severity_display }}');
+        var marker = L.circleMarker([{{ area.latitude }}, {{ area.longitude }}], {
+            radius: 8,
+            fillColor: severityColor,
+            color: "#000",
+            weight: 1,
+            opacity: 1,
+            fillOpacity: 0.8
+        })
+            .bindPopup("<b>{{ area.name }}</b><br>Severity: <span style='color:" + severityColor + ";'>{{ area.get_severity_display }}</span>");
+        markers['{{ area.name }}'] = marker;
+        markerLayer.addLayer(marker);
+    {% endfor %}
+
+    markerLayer.addTo(map);
+    map.fitBounds(bounds, {
+        padding: [50, 50]
+    });
+
+    function toggleMapView(view) {
+        if (view === currentView) return;
+
+        document.getElementById('heatmapBtn').classList.remove('active');
+        document.getElementById('markerBtn').classList.remove('active');
+
+        if (view === 'heatmap') {
+            map.removeLayer(markerLayer);
+            heatLayer.addTo(map);
+            document.getElementById('heatmapBtn').classList.add('active');
+        } else {
+            map.removeLayer(heatLayer);
+            markerLayer.addTo(map);
+            document.getElementById('markerBtn').classList.add('active');
+        }
+        currentView = view;
+    }
+
+    function highlightArea(lat, lon, name, severity) {
+        map.closePopup();
+
+        map.flyTo([lat, lon], 10, {
+            duration: 1
+        });
+
+        if (currentView === 'markers') {
+            setTimeout(function() {
+                markers[name].openPopup();
+            }, 1000);
+        }
+    }
+
+    // Event listeners remain the same
+    document.querySelectorAll('.area-row').forEach(row => {
+        row.addEventListener('click', function() {
+            let lat = parseFloat(this.dataset.lat);
+            let lon = parseFloat(this.dataset.lon);
+            let name = this.dataset.name;
+            let severity = this.dataset.severity;
+            highlightArea(lat, lon, name, severity);
+
+            document.querySelectorAll('.area-row').forEach(r => r.classList.remove('table-active'));
+            this.classList.add('table-active');
+        });
+    });
+
+    window.addEventListener('resize', function() {
+        map.invalidateSize();
+    });
+</script>
+
+<style>
+    .area-row:hover {
+        cursor: pointer;
+        background-color: #f8f9fa;
+    }
+    .table-active {
+        background-color: #e9ecef;
+    }
+    .severity-1 { background-color: #28a745; color: white; }
+    .severity-2 { background-color: #ffc107; color: black; }
+    .severity-3 { background-color: #dc3545; color: white; }
+    .severity-4 { background-color: #6f42c1; color: white; }
+    .badge {
+        font-size: 0.9em;
+        padding: 5px 10px;
+        border-radius: 10px;
+    }
+    .map-controls {
+        position: absolute;
+        z-index: 1000;
+        right: 20px;
+        margin-top: 10px;
+    }
+    .btn-group .btn {
+        background-color: #8d8f90;
+        border: 1px solid #8d8f90;
+    }
+
+    .btn-group .btn.active {
+        background-color: #007bff;
+        color: white;
+        border-color: #007bff;
+    }
+
+    .btn-group .btn:hover:not(.active) {
+        background-color: #8d8f90   ;
+    }
+
+    .comments-section {
+        max-height: 500px;
+        overflow-y: auto;
+    }
+    
+    .comment-form textarea {
+        resize: none;
+    }
+    
+    .card-subtitle {
+        font-size: 0.9rem;
+    }
+</style>
+{% endblock %}
