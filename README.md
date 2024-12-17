@@ -42,6 +42,10 @@ pip install -r requirements-init.txt
 poetry install
 ```
 
+```bash
+pip install psycopg2-binary
+```
+
 ### Run backend
 
 - Edit the environment variables in [.env](.env) file.
