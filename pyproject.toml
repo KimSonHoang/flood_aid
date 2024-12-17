@@ -1,0 +1,55 @@
+[build-system]
+build-backend = "poetry.core.masonry.api"
+requires = ["poetry-core"]
+
+[tool.black]
+exclude = '''
+/(
+    \.git
+ |  \.pytest_cache
+ |  \.vscode
+ |  __pycache__
+ |  .venv
+ |  build
+ |  dist
+ |  migrations
+ |  node_modules
+)/
+'''
+line-length = 88
+preview = true
+target-version = ["py311"]
+
+[tool.poetry]
+authors = ["Your Name <you@example.com>"]
+description = "This is FLOOD_AID"
+name = "flood_aid"
+readme = "README.md"
+version = "0.1.0"
+
+[tool.poetry.dependencies]
+channels = "^4.1.0"
+cytoolz = "^0.12.1"
+daphne = "^4.1.2"
+dj-rest-auth = {extras = ["with-social"], version = "^4.0.0"}
+django = "^4.2"
+django-cors-headers = "^3.14.0"
+django-debug-toolbar = "^4.0.0"
+django-environ = "^0.10.0"
+django-extensions = "^3.2.1"
+djangorestframework = "^3.14.0"
+djangorestframework-simplejwt = "^5.2.2"
+geopy = "^2.4.1"
+gunicorn = "^20.1.0"
+pillow = "^11.0.0"
+psycopg = "^3.1.8"
+python = "^3.11"
+urllib3 = "^1.26.15"
+
+[tool.poetry.group.dev.dependencies]
+black = "^23.3.0"
+faker = "^18.4.0"
+freezegun = "^1.2.2"
+ipdb = "^0.13.13"
+ruff = "^0.7.1"
+toml-sort = "^0.23.1"
