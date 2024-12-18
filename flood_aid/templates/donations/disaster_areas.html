@@ -30,7 +30,7 @@
         </div>
     </div>
     <div class="col-md-4">
-        {% if user.is_authenticated and user.user_type != 'recipient' %}
+        {% if user.is_authenticated and user.user_type != 'recipient' and campaign.get_status_display == 'Đang tiến hành' %}
             <h3>Quyên Góp Ngay</h3>
             {% if user.is_authenticated %}
                 <form method="post">
@@ -65,8 +65,8 @@
             <table class="table table-hover">
                 <thead>
                     <tr>
-                        <th>Tên</th>
-                        <th>Mức Độ</th>
+                        <th>Tên Khu Vực</th>
+                        <th>Mức Độ Thiệt Hại</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -153,20 +153,20 @@
 
     function getSeverityColor(severity) {
         switch(severity.toLowerCase()) {
-            case 'low': return 'green';
-            case 'medium': return 'orange';
-            case 'high': return 'red';
-            case 'critical': return 'purple';
+            case 'thấp': return 'green';
+            case 'trung bình': return 'blue';
+            case 'cao': return 'red';
+            case 'nguy cấp': return 'purple';
             default: return 'blue';
         }
     }
 
     function getSeverityIntensity(severity) {
         switch(severity.toLowerCase()) {
-            case 'low': return 0.3;
-            case 'medium': return 0.5;
-            case 'high': return 0.7;
-            case 'critical': return 1.0;
+            case 'thấp': return 0.3;
+            case 'trung bình': return 0.5;
+            case 'cao': return 0.7;
+            case 'nguy cấp': return 1.0;
             default: return 0.3;
         }
     }
@@ -188,7 +188,7 @@
         maxZoom: 10,
         gradient: {
             0.2: 'blue',
-            0.4: 'lime',
+            0.4: 'green',
             0.6: 'yellow',
             0.8: 'orange',
             1.0: 'red'
@@ -208,7 +208,7 @@
             opacity: 1,
             fillOpacity: 0.8
         })
-            .bindPopup("<b>{{ area.name }}</b><br>Severity: <span style='color:" + severityColor + ";'>{{ area.get_severity_display }}</span>");
+            .bindPopup("<b>{{ area.name }}</b><br>Mức độ thiệt hại: <span style='color:" + severityColor + ";'>{{ area.get_severity_display }}</span>");
         markers['{{ area.name }}'] = marker;
         markerLayer.addLayer(marker);
     {% endfor %}
@@ -239,14 +239,14 @@
     function highlightArea(lat, lon, name, severity) {
         map.closePopup();
 
-        map.flyTo([lat, lon], 10, {
+        map.flyTo([lat, lon], 12, {
             duration: 1
         });
 
         if (currentView === 'markers') {
             setTimeout(function() {
                 markers[name].openPopup();
-            }, 1000);
+            }, 1500);
         }
     }
 
@@ -278,7 +278,7 @@
         background-color: #e9ecef;
     }
     .severity-1 { background-color: #28a745; color: white; }
-    .severity-2 { background-color: #ffc107; color: black; }
+    .severity-2 { background-color: #0000FF; color: white; }
     .severity-3 { background-color: #dc3545; color: white; }
     .severity-4 { background-color: #6f42c1; color: white; }
     .badge {
